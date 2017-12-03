@@ -26,25 +26,25 @@ XMC_WDT_CONFIG_t wdt_cfg;
 /**************************************************************** Functions **/
 
 /** @brief Constructor
- *  Check if watchdog was cause of reset
+ *
  */
-Watchdog::Watchdog() : {
+Watchdog::Watchdog() {
 
     /* Check if watchdog was cause of reset */
     if ((XMC_SCU_RESET_GetDeviceResetReason() & XMC_SCU_RESET_REASON_WATCHDOG) != 0){
-
         wdreset = true;
+    }else{
+        wdreset = false;
     }
-    wdreset = false;
 
     /* Clear system reset status */
     SCU_RESET->RSTCLR |= SCU_RESET_RSTCLR_RSCLR_Msk;
 }
 
-/** @brief Destructor
- *  Disable & stop watchdog timer
+/** @brief Destuctor
+ *
  */
-Watchdog::~Watchdog() : {
+Watchdog::~Watchdog() {
 
     XMC_WDT_Stop();
 }
@@ -55,20 +55,17 @@ Watchdog::~Watchdog() : {
  */
 void Watchdog::configure(float time) {
 
-    float sec_time;
-
     /* Use standby clock as watchdog clock source */
     XMC_SCU_HIB_EnableHibernateDomain();
     XMC_SCU_CLOCK_SetWdtClockSource(XMC_SCU_CLOCK_WDTCLKSRC_STDBY);
     XMC_SCU_CLOCK_EnableClock(XMC_SCU_CLOCK_WDT);
 
-    wdt_time = time / (1 / XMC_SCU_CLOCK_GetWdtClockFrequency());
+    wdt_time = time / (1 / (double)XMC_SCU_CLOCK_GetWdtClockFrequency());
 
     /* Configure watchdog */
     wdt_cfg.window_lower_bound = 0;
     wdt_cfg.window_upper_bound = (uint32_t)wdt_time;
     wdt_cfg.service_pulse_width = 255;
-
 
     XMC_WDT_Init(&wdt_cfg);
     XMC_WDT_Start();

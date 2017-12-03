@@ -13,6 +13,10 @@ public:
      */
     Watchdog();
 
+    /** Delete HelloWorld instance
+     */
+    ~Watchdog();
+
     /** Print the text
      *
      * @param timeout in seconds
@@ -33,6 +37,7 @@ public:
 
 private:
 
+    double wdt_time;
     bool wdreset;
 };
 
